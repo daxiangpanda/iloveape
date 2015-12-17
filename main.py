@@ -2,7 +2,8 @@
 # encoding: utf-8
 import urllib2
 from bs4 import BeautifulSoup
-
+from urllib import unquote
+from urllib import quote
 #oepn url
 def url_open(url):
     req = urllib2.Request(url)
@@ -92,31 +93,42 @@ def get_info(url):
                 n+=1
                 # print suboutput
                 # print '\n'
-            output.append(suboutput)
-    for i in output:
-        for ii in i:
-            print ii
+        output.append(suboutput)
+    # for i in output:
+    #     for ii in i:
+    #         print ii
     return output
 
 
 def get_source(url):
     soup = url_open(url)
-    return soup.find_all("tr")[1].get("data-src")
+    return 'http://www.loveape.com'+soup.find_all("tr")[1].get("data-src")
 #   print
 
 
 def process_output(output):
     processed = []
-    url_root = 'http://www.loveape.com/'
+    url_root = u'http://www.loveape.com/'
     for i in output:
         dict = {}
         dict['name_song'] = i[0]
         dict['name_cd'] = i[2]
-        dict['url_song'] = url_root+'t/add/songID/'+
-        dict['url_resource'] =
+        # http://www.loveape.com/t/add/songID/117233/sourceid/20150507397511/ListenMusic.html
+        dict['url_song'] = url_root+'t/add/songID/'+i[5]+'/sourceid/'+i[6]+'/ListenMusic.html'
+        # print dict['url_song']
+        dict['url_resource'] = get_source(dict['url_song'])
+        print dict
+        processed.append(dict)
     return processed
+
+
+def download(url):
+    pass
+
 url = 'http://www.loveape.com/t/music/q/%E5%88%98%E5%BE%B7%E5%8D%8E/count/20/cur/1/search.html'
 url_song = 'http://www.loveape.com/t/add/songID/28005/sourceid/20141107589657/ListenMusic.html'
-get_source(url_song)
+print get_info(url)
+print process_output(get_info(url))
+
 
 
