@@ -1,11 +1,14 @@
 #!/usr/bin/env python
-# encoding=utf-8
+# -*- coding: utf-8 -*-
 import urllib2
 from bs4 import BeautifulSoup
-from urllib import unquote
+import urllib
+from urllib import urlencode
 from urllib import quote
+import os
 #oepn url
 def url_open(url):
+    # url = urllib.quote(url)
     req = urllib2.Request(url)
     response = urllib2.urlopen(req)
     html = response.read()
@@ -18,7 +21,6 @@ def get_page(url):
     soup = url_open(url)
     max = 0
     for i in soup.find_all("div",class_ = "pagebar")[0].children:
-        print i
         if i.string.isdigit() and i.string>max:
             max = int(i.string)
     return max
@@ -96,7 +98,7 @@ def get_info(url):
         output.append(suboutput)
     # for i in output:
     #     for ii in i:
-    #         print ii
+    #          print ii
     return output
 
 
@@ -117,18 +119,35 @@ def process_output(output):
         dict['url_song'] = url_root+'t/add/songID/'+i[5]+'/sourceid/'+i[6]+'/ListenMusic.html'
         # print dict['url_song']
         dict['url_resource'] = get_source(dict['url_song'])
-        print dict
+        dict['name_singer'] = i[4]
+        # print dict
         processed.append(dict)
     return processed
 
 
-def download(url):
-    pass
+def download(list,path):
+    # print path
+    for i in list:
+        url_source = quote(i['url_resource'].encode('utf-8'),safe = ':/')
+        suffix = url_source.split('.')[-1]
+        path1 = path+'\\'+i['name_singer']+'\\'+i['name_cd']+'\\'
+        file_name = i['name_song']+'.'+suffix
+        if not os.path.exists(path1):
+            os.makedirs(path1)
+        with open(path1+file_name,'wb') as f:
+            req = urllib2.Request(url_source)
+            response = urllib2.urlopen(req)
+            html = response.read()
+            f.write(html)
+        print u'已下载：'+i['name_cd']+'    '+i['name_song']
+
 
 url = 'http://www.loveape.com/t/music/q/%E5%88%98%E5%BE%B7%E5%8D%8E/count/20/cur/1/search.html'
-url_song = 'http://www.loveape.com/t/add/songID/28005/sourceid/20141107589657/ListenMusic.html'
-print get_info(url)
-print process_output(get_info(url))
+max_page = get_page(url)
+for i in range(1,max_page+1):
+    url = 'http://www.loveape.com/t/music/q/%E5%88%98%E5%BE%B7%E5%8D%8E/count/20/cur/'+str(i)+'/search.html'
+    download(process_output(get_info(url)),r'E:\music')
+
 
 
 
